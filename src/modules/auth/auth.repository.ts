@@ -6,4 +6,13 @@ export const AuthRepository = {
             where: { userName },
         });
     },
+
+    async create(data: { userName: string; password: string }) {
+        return prisma.user.create({
+            data: {
+                ...data,
+                role: "CUSTOMER",
+            },
+        });
+    },
 };

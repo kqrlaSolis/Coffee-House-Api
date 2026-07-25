@@ -1,5 +1,5 @@
 import { AuthRepository } from "./auth.repository";
-import { comparePassword, generateJWT } from "../../core/utils/security";
+import { comparePassword, generateJWT, hashPassword } from "../../core/utils/security";
 
 export const login = async (userName: string, password: string) => {
     const user = await AuthRepository.findByUserName(userName);
@@ -12,6 +12,26 @@ export const login = async (userName: string, password: string) => {
     if (!valid) {
         return null;
     }
+
+    const token = generateJWT({
+        id: user.id,
+        userName: user.userName,
+        role: user.role,
+    });
+
+    return {
+        token,
+        user: {
+            id: user.id,
+            userName: user.userName,
+            role: user.role,
+        },
+    };
+};
+
+export const register = async (userName: string, password: string) => {
+    const hashedPassword = await hashPassword(password);
+    const user = await AuthRepository.create({ userName, password: hashedPassword });
 
     const token = generateJWT({
         id: user.id,
