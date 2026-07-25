@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,6 +7,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── USER ───
+
 model User {
   id        Int      @id @default(autoincrement())
   userName  String   @unique
@@ -20,11 +17,116 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   isActive  Boolean  @default(true)
+  orders    Order[]
 }
 
-//CATALOGO DE ROLES
+// ─── CATEGORY ───
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  isActive    Boolean   @default(true)
+  products    Product[]
+}
+
+// ─── PRODUCT ───
+
+model Product {
+  id          Int         @id @default(autoincrement())
+  categoryId  Int
+  category    Category    @relation(fields: [categoryId], references: [id])
+  name        String
+  description String?
+  price       Decimal     @db.Decimal(10, 2)
+  imageUrl    String?
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderItems  OrderItem[]
+}
+
+// ─── ORDER ───
+
+model Order {
+  id              Int                  @id @default(autoincrement())
+  userId          Int
+  user            User                 @relation(fields: [userId], references: [id])
+  orderNumber     String               @unique
+  ticketCode      String               @unique
+  orderStatus     OrderStatus          @default(PENDING)
+  paymentMethod   PaymentMethod
+  paymentStatus   PaymentStatus        @default(PENDING)
+  subtotal        Decimal              @db.Decimal(10, 2)
+  total           Decimal              @db.Decimal(10, 2)
+  notes           String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  items           OrderItem[]
+  payment         Payment?
+  statusHistory   OrderStatusHistory[]
+}
+
+// ─── ORDER ITEM ───
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+}
+
+// ─── PAYMENT ───
+
+model Payment {
+  id                  Int           @id @default(autoincrement())
+  orderId             Int           @unique
+  order               Order         @relation(fields: [orderId], references: [id])
+  method              PaymentMethod
+  status              PaymentStatus @default(PENDING)
+  transactionId       String?
+  amount              Decimal       @db.Decimal(10, 2)
+  stripePaymentIntent String?
+  createdAt           DateTime      @default(now())
+}
+
+// ─── ORDER STATUS HISTORY ───
+
+model OrderStatusHistory {
+  id        Int         @id @default(autoincrement())
+  orderId   Int
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    OrderStatus
+  changedBy String
+  createdAt DateTime    @default(now())
+}
+
+// ─── ENUMS ───
+
 enum Role {
   CUSTOMER
   ADMIN
   BARISTA
+}
+
+enum OrderStatus {
+  PENDING
+  READY
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CARD
+  CASH
 }

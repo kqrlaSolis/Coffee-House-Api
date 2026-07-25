@@ -5,6 +5,9 @@ import helmet from "helmet";
 import morgan from "morgan";
 import userRoutes from "./modules/user/user.routes";
 import authRoutes from "./modules/auth/auth.routes";
+import categoryRoutes from "./modules/category/category.routes";
+import productRoutes from "./modules/product/product.routes";
+import orderRoutes from "./modules/order/order.routes";
 import { errorHandler } from "./core/middleware/errorHandler";
 
 const app = express();
@@ -21,6 +24,9 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/orders", orderRoutes);
 
 app.use(errorHandler);
 
