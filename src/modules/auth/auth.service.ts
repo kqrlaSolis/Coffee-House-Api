@@ -1,10 +1,8 @@
-import { prisma } from "../../core/lib/prisma";
+import { AuthRepository } from "./auth.repository";
 import { comparePassword, generateJWT } from "../../core/utils/security";
 
 export const login = async (userName: string, password: string) => {
-    const user = await prisma.user.findUnique({
-        where: { userName },
-    });
+    const user = await AuthRepository.findByUserName(userName);
 
     if (!user || !user.isActive) {
         return null;
