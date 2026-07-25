@@ -1,7 +1,6 @@
 import { getUsers, getUserById, createUser, updateUser, deleteUser } from "./user.service";
 import type { Request, Response } from "express";
-import type { CreateUserDTO, UpdateUserDTO } from "./models/user.dto";
-import { Role } from "./models/user.dto";
+import { CreateUserSchema, UpdateUserSchema } from "./models/user.dto";
 
 export const listUsers = async (_req: Request, res: Response) => {
     try {
@@ -36,19 +35,17 @@ export const getUser = async (req: Request, res: Response) => {
 
 export const newUser = async (req: Request, res: Response) => {
     try {
-        const { userName, password, role, isActive } = req.body as CreateUserDTO;
+        const result = CreateUserSchema.safeParse(req.body);
 
-        if (!userName || !password) {
-            res.status(400).json({ message: "userName and password are required" });
+        if (!result.success) {
+            res.status(400).json({
+                message: "Validation failed",
+                errors: result.error.flatten().fieldErrors,
+            });
             return;
         }
 
-        const user = await createUser({
-            userName,
-            password,
-            role: role || Role.CUSTOMER,
-            isActive: isActive ?? true,
-        });
+        const user = await createUser(result.data);
 
         res.status(201).json(user);
     } catch (error: any) {
@@ -69,19 +66,17 @@ export const updatingUser = async (req: Request, res: Response) => {
             return;
         }
 
-        const { userName, password, role, isActive } = req.body as UpdateUserDTO;
+        const result = UpdateUserSchema.safeParse(req.body);
 
-        if (!userName || !role || isActive === undefined) {
-            res.status(400).json({ message: "userName, role, and isActive are required" });
+        if (!result.success) {
+            res.status(400).json({
+                message: "Validation failed",
+                errors: result.error.flatten().fieldErrors,
+            });
             return;
         }
 
-        const data: any = { userName, role, isActive };
-        if (password) {
-            data.password = password;
-        }
-
-        const user = await updateUser(id, data);
+        const user = await updateUser(id, result.data);
         res.json(user);
     } catch (error: any) {
         if (error.code === "P2025") {

@@ -1,13 +1,8 @@
-export interface LoginDTO {
-    userName: string;
-    password: string;
-}
+import { z } from "zod";
 
-export interface AuthResponseDTO {
-    token: string;
-    user: {
-        id: number;
-        userName: string;
-        role: string;
-    };
-}
+export const LoginSchema = z.object({
+    userName: z.string().min(1, "userName is required").max(50),
+    password: z.string().min(1, "password is required").max(100),
+});
+
+export type LoginDTO = z.infer<typeof LoginSchema>;
