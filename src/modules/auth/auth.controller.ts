@@ -1,29 +1,20 @@
 import { login } from "./auth.service";
 import type { Request, Response } from "express";
 import { LoginSchema } from "./models/auth.dto";
+import { AppError } from "../../core/errors/AppError";
 
 export const loginUser = async (req: Request, res: Response) => {
-    try {
-        const result = LoginSchema.safeParse(req.body);
+    const result = LoginSchema.safeParse(req.body);
 
-        if (!result.success) {
-            res.status(400).json({
-                message: "Validation failed",
-                errors: result.error.flatten().fieldErrors,
-            });
-            return;
-        }
-
-        const loginResult = await login(result.data.userName, result.data.password);
-
-        if (!loginResult) {
-            res.status(401).json({ message: "Invalid credentials" });
-            return;
-        }
-
-        res.json(loginResult);
-    } catch (error) {
-        console.error("Login error:", error);
-        res.status(500).json({ message: "Error during login" });
+    if (!result.success) {
+        throw new AppError(400, "Validation failed", result.error.flatten().fieldErrors);
     }
+
+    const loginResult = await login(result.data.userName, result.data.password);
+
+    if (!loginResult) {
+        throw new AppError(401, "Invalid credentials");
+    }
+
+    res.json(loginResult);
 };
