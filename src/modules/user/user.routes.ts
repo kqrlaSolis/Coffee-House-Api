@@ -5,8 +5,8 @@ import { Role } from "@prisma/client";
 
 const router = Router();
 
-router.get("/", listUsers);
-router.get("/:id", getUser);
+router.get("/", auth, listUsers);
+router.get("/:id", auth, getUser);
 router.post("/", auth, authorize(Role.ADMIN), newUser);
 router.put("/:id", auth, authorize(Role.ADMIN, Role.BARISTA), updatingUser);
 router.delete("/:id", auth, authorize(Role.ADMIN, Role.BARISTA), removingUser);
