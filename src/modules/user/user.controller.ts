@@ -48,8 +48,8 @@ export const newUser = async (req: Request, res: Response) => {
         const user = await createUser(result.data);
 
         res.status(201).json(user);
-    } catch (error: any) {
-        if (error.code === "P2002") {
+    } catch (error) {
+        if ((error as { code?: string }).code === "P2002") {
             res.status(409).json({ message: "Username already exists" });
             return;
         }
@@ -78,8 +78,8 @@ export const updatingUser = async (req: Request, res: Response) => {
 
         const user = await updateUser(id, result.data);
         res.json(user);
-    } catch (error: any) {
-        if (error.code === "P2025") {
+    } catch (error) {
+        if ((error as { code?: string }).code === "P2025") {
             res.status(404).json({ message: "User not found" });
             return;
         }
@@ -98,8 +98,8 @@ export const removingUser = async (req: Request, res: Response) => {
 
         const user = await deleteUser(id);
         res.json(user);
-    } catch (error: any) {
-        if (error.code === "P2025") {
+    } catch (error) {
+        if ((error as { code?: string }).code === "P2025") {
             res.status(404).json({ message: "User not found" });
             return;
         }

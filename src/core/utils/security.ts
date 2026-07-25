@@ -1,22 +1,24 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { secretKey } from '../config/config';
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { secretKey } from "../config/config";
+import type { Role } from "@prisma/client";
 
-export const hashPassword = async (password: string) =>
-    await bcrypt.hash(password, 10);
+export interface JwtPayload {
+    id: number;
+    userName: string;
+    role: Role;
+}
 
-export const comparePassword = async (password: string, hash: string) =>
-    await bcrypt.compare(password, hash);
+export const hashPassword = (password: string) =>
+    bcrypt.hash(password, 10);
 
-export const generateJWT = async (payload: any | {}) =>
+export const comparePassword = (password: string, hash: string) =>
+    bcrypt.compare(password, hash);
+
+export const generateJWT = (payload: JwtPayload): string =>
     jwt.sign(payload, secretKey, {
-        expiresIn: '1d',
+        expiresIn: "1d",
     });
 
-export const generateToken = async (email: string) =>
-    jwt.sign({ email }, secretKey, {
-        expiresIn: '1d',
-    });
-
-export const verifyToken = async (token: string) =>
-    jwt.verify(token, secretKey);
+export const verifyToken = (token: string): JwtPayload =>
+    jwt.verify(token, secretKey) as JwtPayload;

@@ -13,7 +13,7 @@ export const login = async (userName: string, password: string) => {
         return null;
     }
 
-    const token = await generateJWT({
+    const token = generateJWT({
         id: user.id,
         userName: user.userName,
         role: user.role,

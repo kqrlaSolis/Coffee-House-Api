@@ -12,8 +12,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
         }
 
         const token = header.split(" ")[1];
-        const decoded = await verifyToken(token);
-        (req as any).user = decoded;
+        req.user = verifyToken(token);
         next();
     } catch {
         res.status(401).json({ message: "Invalid token" });
@@ -22,9 +21,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
 
 export const authorize = (...roles: Role[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
-        const user = (req as any).user;
-
-        if (!user || !roles.includes(user.role)) {
+        if (!req.user || !roles.includes(req.user.role)) {
             res.status(403).json({ message: "Insufficient permissions" });
             return;
         }
